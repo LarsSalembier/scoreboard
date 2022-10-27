@@ -1,4 +1,4 @@
-import { Card, Row, Text } from "@nextui-org/react";
+import { Card, Container, Loading, Row, Text } from "@nextui-org/react";
 import Scoreboard from "./components/Scoreboard";
 import { useEffect, useState } from "react";
 import NewPlayerModal from "./components/NewPlayerModal";
@@ -35,9 +35,9 @@ const dummyPlayer: Player = {
 function App() {
   const playersInit: Array<Player> = [];
   const [players, setPlayers] = useState(playersInit);
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const [isAddingUser, setIsAddingUser] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [scoreEditorShown, setScoreEditorShown] = useState(false);
   const [currentlyBeingEdited, setCurrentlyBeingEdited] = useState(dummyPlayer);
 
@@ -47,9 +47,9 @@ function App() {
   ) as CollectionReference<Player>;
 
   const getUsersWithLoading = async () => {
-    // setIsLoading(true);
+    setIsLoading(true);
     await getUsers();
-    // setIsLoading(false);
+    setIsLoading(false);
   };
 
   const getUsers = async () => {
@@ -71,14 +71,14 @@ function App() {
   };
 
   const addPlayer = async (name: string, avatar: string) => {
-    // setIsLoading(true);
+    setIsLoading(true);
     await addDoc(playersCollectionRef, {
       name: name,
       avatar: avatar,
       score: 0,
     });
     getUsers();
-    // setIsLoading(false);
+    setIsLoading(false);
   };
 
   const changeScoreOfPlayer = async (id: string, newScore: number) => {
@@ -89,49 +89,57 @@ function App() {
 
   const deletePlayer = async (id?: string) => {
     if (id) {
-      // setIsLoading(true);
+      setIsLoading(true);
       const playerDoc = doc(db, "players", id);
       await deleteDoc(playerDoc);
       getUsers();
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Card css={{ maxWidth: "400px" }} className="App">
-      <Scoreboard
-        // isLoading={isLoading}
-        players={players}
-        inEditMode={isEditing}
-        setCurrentlyBeingEdited={setCurrentlyBeingEdited}
-        setScoreEditorShown={setScoreEditorShown}
-        onDeletePlayer={deletePlayer}
-      />
-      <Row justify="flex-end">
-        {isEditing ? (
-          <>
-            <Text css={{ alignSelf: "center" }}>Edit mode enabled.</Text>
-            <AddButton isVisible={isEditing} onPress={openAddModal} />
-          </>
-        ) : (
-          <></>
-        )}
-        <EditButton isEditing={isEditing} onPress={switchEditMode} />
-      </Row>
+    <Container
+      css={{ maxWidth: "400px" }}
+      className="App"
+      justify="center"
+      alignItems="center"
+    >
+      <Card>
+        <Scoreboard
+          // isLoading={isLoading}
+          players={players}
+          inEditMode={isEditing}
+          setCurrentlyBeingEdited={setCurrentlyBeingEdited}
+          setScoreEditorShown={setScoreEditorShown}
+          onDeletePlayer={deletePlayer}
+        />
+        <Row justify="flex-end">
+          {isEditing ? (
+            <>
+              <Text css={{ alignSelf: "center" }}>Edit mode enabled.</Text>
+              <AddButton isVisible={isEditing} onPress={openAddModal} />
+            </>
+          ) : (
+            <></>
+          )}
+          <EditButton isEditing={isEditing} onPress={switchEditMode} />
+        </Row>
 
-      <NewPlayerModal
-        isVisible={isAddingUser}
-        onClose={() => setIsAddingUser(false)}
-        onAddPlayer={addPlayer}
-        currentPlayers={players}
-      />
-      <EditScoreModal
-        isVisible={scoreEditorShown}
-        onClose={() => setScoreEditorShown(false)}
-        onSave={changeScoreOfPlayer}
-        player={currentlyBeingEdited}
-      />
-    </Card>
+        <NewPlayerModal
+          isVisible={isAddingUser}
+          onClose={() => setIsAddingUser(false)}
+          onAddPlayer={addPlayer}
+          currentPlayers={players}
+        />
+        <EditScoreModal
+          isVisible={scoreEditorShown}
+          onClose={() => setScoreEditorShown(false)}
+          onSave={changeScoreOfPlayer}
+          player={currentlyBeingEdited}
+        />
+      </Card>
+      {isLoading ? <Loading size="lg" css={{ margin: "20px" }} /> : <></>}
+    </Container>
   );
 }
 

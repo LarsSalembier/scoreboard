@@ -72,6 +72,19 @@ const Scoreboard = ({
         >
           <Text h1>Scoreboard</Text>
         </Row>
+
+        {players.length == 0 ? (
+          <Row
+            key="header"
+            justify="center"
+            align="center"
+            css={{ marginBottom: "10px" }}
+          >
+            <Text>The scoreboard is currently empty. Add some players!</Text>
+          </Row>
+        ) : (
+          <></>
+        )}
         {/* {isLoading ? (
           <Loading size="xl" />
         ) : ( */}
