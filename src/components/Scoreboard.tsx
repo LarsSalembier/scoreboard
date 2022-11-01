@@ -1,155 +1,117 @@
-import {
-  Card,
-  Container,
-  Grid,
-  Loading,
-  Row,
-  Text,
-  User,
-} from "@nextui-org/react";
-import { Player } from "../App";
-import { IconButton } from "./IconButton";
+import { Card, Row, Text, User } from "@nextui-org/react";
+import { IconButton } from "./buttons/IconButton";
 import { MdDelete as DeleteIcon } from "react-icons/md";
+import { Player } from "../interfaces/Player";
+import { DEFAULT_AVATAR_IMAGE } from "../App";
+import EditModal from "./EditModal";
+
+const sortFunction = (a: Player, b: Player) => {
+  if (a.data.score > b.data.score) {
+    return -1;
+  } else if (a.data.score < b.data.score) {
+    return 1;
+  } else {
+    if (a.data.name < b.data.name) {
+      return -1;
+    } else {
+      return 1;
+    }
+  }
+};
 
 interface Props {
-  // isLoading: boolean;
   players: Array<Player>;
   inEditMode: boolean;
   setCurrentlyBeingEdited: (value: Player) => void;
   setScoreEditorShown: (value: boolean) => void;
   onDeletePlayer: (id: string) => void;
+  onUpdateScore: (id: string, newScore: number) => void;
 }
 
 const Scoreboard = ({
-  // isLoading,
   players,
   inEditMode,
   setCurrentlyBeingEdited,
   setScoreEditorShown,
   onDeletePlayer,
+  onUpdateScore,
 }: Props) => {
-  players.sort(function (a, b) {
-    if (a.score > b.score) {
-      return -1;
-    } else if (a.score < b.score) {
-      return 1;
-    } else {
-      if (a.name < b.name) {
-        return -1;
-      } else {
-        return 1;
-      }
-    }
-  });
+  players.sort(sortFunction);
 
   const scoreClickHandler = (player: Player) => () => {
     setCurrentlyBeingEdited(player);
     setScoreEditorShown(true);
-    console.log("test");
   };
 
-  const deletePlayerHandler = (player: Player) => () => {
-    if (player.id) {
-      onDeletePlayer(player.id);
-    }
+  const deletePlayerHandler = (id: string) => () => {
+    onDeletePlayer(id);
+  };
+
+  const updateScoreHandler = (id: string) => (newScore: number) => {
+    onUpdateScore(id, newScore);
   };
 
   return (
     <>
-      <Container
-        css={{
-          margin: "10px",
-          alignItems: "space-between",
-          display: "flex",
-          justifyContent: "space-between",
+      <div
+        style={{
+          width: "400px",
         }}
       >
-        <Row
-          key="header"
-          justify="center"
-          align="center"
-          css={{ marginBottom: "10px" }}
-        >
-          <Text h1>Scoreboard</Text>
-        </Row>
+        <Text css={{ textAlign: "center", marginBottom: "20px" }} h1>
+          Scoreboard
+        </Text>
 
         {players.length == 0 ? (
-          <Row
-            key="header"
-            justify="center"
-            align="center"
-            css={{ marginBottom: "10px" }}
-          >
-            <Text>The scoreboard is currently empty. Add some players!</Text>
-          </Row>
+          <Text css={{ textAlign: "center" }}>
+            The scoreboard is currently empty. Add some players!
+          </Text>
         ) : (
-          <></>
-        )}
-        {/* {isLoading ? (
-          <Loading size="xl" />
-        ) : ( */}
-        {players.map((player) => (
-          <Row
-            key={player.name}
-            justify="space-between"
-            align="center"
-            css={{ marginBottom: "10px", marginRight: "25px" }}
-          >
-            <Grid.Container justify="space-between">
-              <Grid>
+          players.map((player, index) => (
+            <Row key={player.id} align="center" css={{ marginBottom: "10px" }}>
+              <Row justify="flex-start" align="center">
+                <Text
+                  css={{ margin: 0, textAlign: "center", width: "48px" }}
+                  h3
+                >
+                  {index + 1}
+                </Text>
                 <User
+                  size="lg"
                   squared
                   src={
-                    player.avatar ? player.avatar : "/default-user-avatar.png"
+                    player.data.avatar
+                      ? player.data.avatar
+                      : DEFAULT_AVATAR_IMAGE
                   }
-                  name={player.name}
+                  name={player.data.name}
                   css={{ p: 0 }}
                 />
-              </Grid>
-              <Grid
-                css={{
-                  width: "50px",
-                  height: "50px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Row
-                  justify="space-between"
-                  align="center"
-                  css={{ w: "75px", marginRight: "30px" }}
-                >
-                  <div
-                    onClick={inEditMode ? scoreClickHandler(player) : void 0}
-                  >
-                    <Card
-                      variant="flat"
+              </Row>
+
+              <Row justify="flex-end" align="center">
+                <EditModal
+                  player={player}
+                  updateScore={updateScoreHandler(player.id)}
+                  inEditMode={inEditMode}
+                />
+                <div style={{ width: "48px" }}>
+                  {inEditMode && (
+                    <IconButton
+                      onClick={deletePlayerHandler(player.id)}
                       css={{
-                        cursor: inEditMode ? "pointer" : "default",
-                        h: "50px",
-                        w: "50px",
-                        justifyContent: "center",
-                        alignItems: "center",
+                        width: "40px",
                       }}
                     >
-                      <Text h5 css={{ m: 0 }}>
-                        {player.score}
-                      </Text>
-                    </Card>
-                  </div>
-                  {inEditMode ? (
-                    <IconButton onClick={deletePlayerHandler(player)}>
-                      <DeleteIcon />
+                      <DeleteIcon size="20px" />
                     </IconButton>
-                  ) : (
-                    <></>
                   )}
-                </Row>
-              </Grid>
-            </Grid.Container>
-          </Row>
-        ))}
-      </Container>
+                </div>
+              </Row>
+            </Row>
+          ))
+        )}
+      </div>
     </>
   );
 };

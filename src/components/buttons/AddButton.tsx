@@ -1,21 +1,12 @@
-import { Button } from "@nextui-org/react";
 import { MdAdd as AddIcon } from "react-icons/md";
+import MenuButton from "./MenuButton";
 
 interface Props {
-  isVisible: boolean;
   onPress: () => void;
 }
 
-const AddButton = ({ isVisible, onPress }: Props) => (
-  <Button
-    auto
-    icon={<AddIcon />}
-    style={{
-      margin: "10px",
-    }}
-    css={isVisible ? {} : { display: "none" }}
-    onPress={onPress}
-  ></Button>
+const AddButton = ({ onPress }: Props) => (
+  <MenuButton icon={<AddIcon />} onPress={onPress} />
 );
 
 export default AddButton;
